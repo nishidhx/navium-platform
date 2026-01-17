@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "nodenext",
+  "moduleResolution": "nodenext",
+    "outDir": "../../../builds/packages/utils/logger",
+    "rootDir": "./",
+    "esModuleInterop": true,
+    "declaration": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "isolatedModules": false
+  },
+  "include": ["**/*.ts"]
+}
