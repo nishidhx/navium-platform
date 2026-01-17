@@ -38,11 +38,12 @@ model User {
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
 
-  likes    Like[]
-  reposts  Repost[]
-  comments Comment[]
-  sentShares Share[] @relation("ShareSender")
-  receivedShares Share[] @relation("ShareReceiver")
+  likes          Like[]
+  reposts        Repost[]
+  comments       Comment[]
+  sentShares     Share[]    @relation("ShareSender")
+  receivedShares Share[]    @relation("ShareReceiver")
+  Bookmarks      Bookmark[]
 
   createdAt DateTime @default(now())
 }
@@ -57,12 +58,13 @@ model Post {
   user   User?   @relation(fields: [userId], references: [id])
   userId String?
 
-  likes    Like[]
-  reposts  Repost[]
-  comments Comment[]
-  shares Share[]
+  likes     Like[]
+  reposts   Repost[]
+  comments  Comment[]
+  shares    Share[]
   bookmarks Bookmark[]
-
+  views     View[]
+  Analytics Analytics?
 }
 
 model Follow {
@@ -125,7 +127,7 @@ model Comment {
   postId String
   post   Post   @relation(fields: [postId], references: [id])
 
-  content String 
+  content String
 
   createdAt DateTime @default(now())
 }
@@ -133,21 +135,49 @@ model Comment {
 model Share {
   id String @id @default(uuid())
 
-  senderId   String
-  sender     User @relation("ShareSender", fields: [senderId], references: [id])
+  senderId String
+  sender   User   @relation("ShareSender", fields: [senderId], references: [id])
 
   receiverId String
-  receiver   User @relation("ShareReceiver", fields: [receiverId], references: [id])
+  receiver   User   @relation("ShareReceiver", fields: [receiverId], references: [id])
 
-  postId     String
-  post       Post @relation(fields: [postId], references: [id])
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([senderId, receiverId, postId])
 }
 
 model Bookmark {
   id String @id @default(uuid())
-  
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  post   Post?   @relation(fields: [postId], references: [id])
+  postId String?
+}
+
+model View {
+  id String @id @default(uuid())
+
+  userId String?
+  postId String
+  post   Post    @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Analytics {
+  id     String @id @default(uuid())
+  postId String @unique
+  post   Post   @relation(fields: [postId], references: [id])
+
+  likeCount     Int @default(0)
+  commentCount  Int @default(0)
+  respostCount  Int @default(0)
+  shareCount    Int @default(0)
+  bookmarkCount Int @default(0)
+  viewCount     Int @default(0)
 }
