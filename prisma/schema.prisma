@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  MIXED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  firstname    String
+  lastname     String   @default("")
+  phone_number String   @unique
+  email        String   @unique
+  hash_pass    String   @unique
+  DOB          DateTime
+  posts        Post[]
+
+  followers Follow[] @relation("followers")
+  following Follow[] @relation("following")
+
+  likes    Like[]
+  reposts  Repost[]
+  comments Comment[]
+  sentShares Share[] @relation("ShareSender")
+  receivedShares Share[] @relation("ShareReceiver")
+
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id String @id @default(uuid())
+
+  description String
+  media       Media[]
+  type        PostType
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  likes    Like[]
+  reposts  Repost[]
+  comments Comment[]
+  shares Share[]
+  bookmarks Bookmark[]
+
+}
+
+model Follow {
+  id String @id @default(uuid())
+
+  followerId String
+  follower   User   @relation("following", fields: [followerId], references: [id])
+
+  followingId String
+  following   User   @relation("followers", fields: [followingId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model Media {
+  id   String    @id @default(uuid())
+  url  String
+  type MediaType
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+}
+
+model Like {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Repost {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+
+  content String 
+
+  createdAt DateTime @default(now())
+}
+
+model Share {
+  id String @id @default(uuid())
+
+  senderId   String
+  sender     User @relation("ShareSender", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver   User @relation("ShareReceiver", fields: [receiverId], references: [id])
+
+  postId     String
+  post       Post @relation(fields: [postId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@unique([senderId, receiverId, postId])
+}
+
+model Bookmark {
+  id String @id @default(uuid())
+  
+}
