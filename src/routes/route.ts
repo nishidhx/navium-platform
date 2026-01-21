@@ -47,7 +47,7 @@ export class RouteHandler {
      * @returns {number} 
     */
     public addRoute(routeOptions: DefaultRouteOptions): number {
-        logger.debug(`Registering new route: [${routeOptions.method}] ${routeOptions.path} ${routeOptions.middleware ? 'with middleware' : 'without middleware'}`);
+        logger.D(`Registering new route: [${routeOptions.method}] ${routeOptions.path} ${routeOptions.middleware ? 'with middleware' : 'without middleware'}`);
         this.routes.push(routeOptions);
         return this.routes.length
     }
@@ -75,33 +75,33 @@ export class RouteHandler {
             const requestMethod = request.method ?? "GET";
             const parsedUrl = url.parse(request.url || '', true);
             const requestPathname = parsedUrl.path || "/";
-            logger.debug(`Handling request route: method=${requestMethod}, pathname=${requestPathname}`);
+            logger.D(`Handling request route: method=${requestMethod}, pathname=${requestPathname}`);
 
             console.log(requestPathname);
             console.log(parsedUrl);
                 for (const route of routes) {
                 const isRouteMactched = await RouteHandler.validateRoutePath(route.path, requestPathname || "", request as unknown as Http2ServerRequest);
                 const isEndpointSafe = RouteHandler.validateRouteEndpoint(route.path, requestPathname);
-                logger.warn(`Route Endpoint Safe: ${isEndpointSafe} : ${requestPathname}`)
-                logger.debug(`Route match result for [${route.method}] ${route.path}: ${isRouteMactched?.matched}`);
+                logger.W(`Route Endpoint Safe: ${isEndpointSafe} : ${requestPathname}`)
+                logger.D(`Route match result for [${route.method}] ${route.path}: ${isRouteMactched?.matched}`);
 
                 if (route.method === requestMethod && isRouteMactched?.matched) {
                     request.params = isRouteMactched.params ?? {}
-                    logger.debug(`req params: ${JSON.stringify(request.params)}`)
+                    logger.D(`req params: ${JSON.stringify(request.params)}`)
                     request.query = isRouteMactched.query ?? {}
-                    logger.debug(`req query: ${JSON.stringify(request.query)}`)
+                    logger.D(`req query: ${JSON.stringify(request.query)}`)
                     request.body = isRouteMactched.body ?? {}
-                    logger.debug(`req body: ${JSON.stringify(request.body)}`)
+                    logger.D(`req body: ${JSON.stringify(request.body)}`)
                 
-                    logger.debug(`Condition: ${Boolean(route.middleware && (route.middleware?.length ?? [].length) > 0)}`)
+                    logger.D(`Condition: ${Boolean(route.middleware && (route.middleware?.length ?? [].length) > 0)}`)
 
                     if (route.middleware && (route.middleware?.length ?? [].length) > 0) {
-                        logger.info("Middleware Entered");
+                        logger.I("Middleware Entered");
                         / * Enters the middleware */
                         runMiddleware(request, response, route.middleware, route.handler);
                         return;
                     }else {
-                        logger.info("no middleware found");
+                        logger.I("no middleware found");
                         return route.handler(request, response);
                     }
                 }
@@ -109,11 +109,11 @@ export class RouteHandler {
                     // continue to next route if not matched; final 404 handled after loop
             }
                 // No route matched after checking all registered routes
-                logger.info("route not found");
+                logger.I("route not found");
                 response.statusCode = 404;
                 response.end(JSON.stringify({ message: "404 route not found" }));
         }catch (error) {
-            logger.error(`Error handling request route: ${(error as Error).message}`);
+            logger.E(`Error handling request route: ${(error as Error).message}`);
             return null;
         }
     }
@@ -132,12 +132,12 @@ export class RouteHandler {
      */
     private static async validateRoutePath(routePath: string, requestPath: string, request: Http2ServerRequest) {
         try {
-            logger.debug(`Validating route path: routePath=${routePath}, requestPath=${requestPath}`);
+            logger.D(`Validating route path: routePath=${routePath}, requestPath=${requestPath}`);
             
             / * Required Query Parameters */
             const [pathWithoutQuery, queryString] = requestPath.split("?");
 
-            logger.debug(`query string: ` + queryString);
+            logger.D(`query string: ` + queryString);
             
             / * Path segements */
             const routePathSegements = routePath.split("/").filter(seg => seg.length > 0);
@@ -164,7 +164,7 @@ export class RouteHandler {
 
             / * Early return if segment lengths do not match */
             if (routePathSegements.length !== requestPathSegements?.length) {
-                logger.debug(`Segment length mismatch: routeSegments=${routePathSegementsLength}, requestSegments=${requestPathSegementsLength}, routePath=${routePath}, requestPath=${requestPath}`);
+                logger.D(`Segment length mismatch: routeSegments=${routePathSegementsLength}, requestSegments=${requestPathSegementsLength}, routePath=${routePath}, requestPath=${requestPath}`);
                 return { matched: false, params: {}, query: {}, body: {}};
             }
 
@@ -177,10 +177,10 @@ export class RouteHandler {
                 if (!routeSegment || !requestPathSegement) return { matched: false, params: {}, query: {}, body: {}};
 
                 if (routeSegment.startsWith(":")) {
-                    logger.warn(`reqSegment safe param test: ${RouteHandler.SAFE_PARAM_REGEX.test(requestPathSegement)}`)
-                    logger.debug(`Extracting prams: routeSegment=${routeSegment}, requestSegment=${requestPathSegement}`);
+                    logger.W(`reqSegment safe param test: ${RouteHandler.SAFE_PARAM_REGEX.test(requestPathSegement)}`)
+                    logger.D(`Extracting prams: routeSegment=${routeSegment}, requestSegment=${requestPathSegement}`);
                     if (!RouteHandler.SAFE_PARAM_REGEX.test(requestPathSegement)) {
-                        logger.debug(`Unsafe parameter value detected: ${requestPathSegement}`);
+                        logger.D(`Unsafe parameter value detected: ${requestPathSegement}`);
                         return { matched: false, params: {}, query: {}, body: {}};
                     }   
 
@@ -212,7 +212,7 @@ export class RouteHandler {
             }
 
         }catch (error) {
-            logger.error(`Error validating route path: ${(error as Error).message}`);
+            logger.E(`Error validating route path: ${(error as Error).message}`);
         }
 
     }
@@ -235,18 +235,18 @@ export class RouteHandler {
              / * end channel and parse JSON */
              request.on("end", () => {
                 try {
-                    logger.debug(`Parsing request body: ${requestBody}`);
+                    logger.D(`Parsing request body: ${requestBody}`);
                     const parsedBody = JSON.parse(requestBody || "{}");
                     resolve(parsedBody);
                 }catch (error) {
-                    logger.error(`Error parsing request body: ${(error as Error).message}`)
+                    logger.E(`Error parsing request body: ${(error as Error).message}`)
                     reject(error);
                 }
              });
 
              / * error channel */
              request.on("error", (err) => {
-                logger.error(`Request error while parsing body: ${err.message}`);
+                logger.E(`Request error while parsing body: ${err.message}`);
                 reject(err);
              })
         })

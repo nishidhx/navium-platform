@@ -57,11 +57,9 @@ export class Logger {
     /**
      * convenince api
      */
-    debug(msg: string) {this.log("debug", msg)}
-    info(msg: string) {this.log("info", msg)}
-    warn(msg: string) {this.log("warn", msg)}
-    error(msg: string) {this.log("error", msg)}
-
-
+    D(msg: string) {this.log("debug", msg)}
+    I(msg: string) {this.log("info", msg)}
+    W(msg: string) {this.log("warn", msg)}
+    E(msg: string) {this.log("error", msg)}
 }
 

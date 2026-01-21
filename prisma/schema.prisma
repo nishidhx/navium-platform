@@ -31,7 +31,7 @@ model User {
   lastname     String   @default("")
   phone_number String   @unique
   email        String   @unique
-  hash_pass    String   @unique
+  hash_pass    String   
   DOB          DateTime
   posts        Post[]
 

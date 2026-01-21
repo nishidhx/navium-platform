@@ -21,11 +21,7 @@ export class AuthRouter {
      * Routes Initializers
      */
     private initializeRoutes() {
-        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/x2", handler: (req, res) => {
-            AuthController.navium_plt_register();
-            res.end(JSON.stringify({message: "Hello from the auth routes"}));
-            return {}
-        }, description: "checking"});    
+        this.routeHandler.addRoute({ method: HTTPMETHOD.POST, path: "/api/v1/register_plt", handler: AuthController.navium_plt_register, description: "checking"});    
     }
 
     /**
