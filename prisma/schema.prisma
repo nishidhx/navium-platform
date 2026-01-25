@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js "
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -29,10 +29,11 @@ model User {
   username     String   @unique
   firstname    String
   lastname     String   @default("")
-  phone_number String   @unique
+  phone_number String 
   email        String   @unique
-  hash_pass    String   
+  hash_pass    String
   DOB          DateTime
+  image_url    String   @default("")
   posts        Post[]
 
   followers Follow[] @relation("followers")

@@ -10,6 +10,7 @@ import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
 import { _compareHashPLTpass, _createHashStringPLT } from "../lib/conversions/hashing.js";
 import { generatePLTAuthToken } from "../services/tokenGenerator.js";
 import cookie from "cookie";
+import { GoogleAuthService } from "../services/google.services.js";
 
 export class AuthController {
 
@@ -85,6 +86,136 @@ export class AuthController {
             }
 
         return data;
+    }
+
+
+    /**
+     * @method navium_plt_google_oauth - logins user in with google oauth.
+     * @param {ServerRequest} request - request object.
+     * @param {ServerResponse} response - response object.
+     */
+    public static async navium_plt_google_oauth(request: ServerRequest, response: ServerResponse) {
+        const { error } = await safeWrapper(async () => {
+            const oauth_url = GoogleAuthService.generateGoogleOAuthURL();
+            logger.I("Google's oauth url: " + oauth_url);
+            if (!oauth_url) {
+                logger.W("Google oauth url not found");
+                responseBody(request, response, 500, { message: "failed to generate google oauth url" }, "failed to generate google oauth url", LoggerLevel.ERROR);
+                return;
+            }
+            responseBody(request, response, 302, {}, "redirecting to google oauth", LoggerLevel.INFO, { Location: oauth_url });
+            return;
+        })();
+
+        if (error) {
+            logger.E("" + error);
+            responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+            return;
+        }
+        responseBody(request, response, 501, { message: "not implemented yet" }, "not implemented yet", LoggerLevel.WARN);
+        return;
+    }
+
+    /**
+     * @method googleCallback - handles google oauth callback, verifies user, saves and creates user in the database, and returns the jwt.
+     * @param {ServerRequest} request - request object
+     * @param {ServerResponse} response - response object
+     */
+    public static async googleCallback(request: ServerRequest, response: ServerResponse): Promise<void> {
+        try {
+            const search = new URL(request.url ?? "/", "http://localhost:3001").searchParams;
+            logger.I("google callback search params: " + search);
+
+            / * extracting code from search parameters from the request url */
+            const _google_oauth_code = search.get("code");
+            logger.I("google_oauth_code: " + _google_oauth_code);
+            
+            if (!_google_oauth_code) {
+                responseBody(request, response, 401, { message: "google oauth code not found" }, "google oauth code not found", LoggerLevel.WARN);
+                return;
+            }
+
+            / * fetch google user via code */
+            /**
+             * @type {{
+             *  googleId: string,
+             *  email: string,
+             *  name: string,
+             *  picture: string
+             * }}
+             */
+            const _google_user = await GoogleAuthService.getUserFromCode(_google_oauth_code);
+
+            if (!_google_user) {
+                responseBody(request, response, 500, { message: "failed to fetch google user" }, "failed to fetch google user", LoggerLevel.ERROR);
+                return;
+            }
+
+            / * destructure google user */
+            const { email, googleId, name, picture, DOB, phone_number } = _google_user;
+
+            let google_oauth_user = await prisma.user.findUnique({
+                where: {
+                    email: email
+                }, 
+                select: {
+                    firstname: true,
+                    lastname: true,
+                    id: true,
+                    email: true,
+                    username: true
+                }
+            });
+
+            if (!google_oauth_user) {
+                google_oauth_user = await prisma.user.create({
+                    data: {
+                        email: email,
+                        username: email.split("@")[0] ?? "name" + "_google" + Date.now(),
+                        firstname: name.split(" ")[0] ?? "Google",
+                        lastname: name.split(" ")[1] ?? "User",
+                        phone_number: phone_number ?? "0000000000",
+                        hash_pass: "google_oauth_no_pass_" + Date.now(),
+                        DOB: DOB ? new Date(DOB) : new Date("2000-01-01"),
+                        image_url: picture
+                    },
+                    select: {
+                        firstname: true,
+                        lastname: true,
+                        id: true,
+                        email: true,
+                        username: true
+                    }
+                })
+            }
+
+            const _token_creation_plt_payload = {
+                username: google_oauth_user.username,
+                id: google_oauth_user.id + "navium_plt",
+                email: google_oauth_user.email,
+                date_of_birth: DOB,
+                provider: "google_oauth"
+            }
+
+            const oauth_user_plt_token = await generatePLTAuthToken(_token_creation_plt_payload, "7d");
+
+            / * set cookie */
+            const setCookieOption = cookie.serialize("plt_tk", oauth_user_plt_token + "navium_plt", {
+                httpOnly: process.env.NODE_ENV === "production",
+                secure: process.env.NODE_ENV === "production",
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60), // 7 days
+                sameSite: "lax",
+            })
+
+            const redirectURL = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + "/oauth-success" : "http://localhost:3000/oauth-success";
+
+            responseBody(request, response, 302, { message: "user logged in successfully", authorized: true, token: oauth_user_plt_token }, "user logged in successfully", LoggerLevel.INFO, { "Set-Cookie": setCookieOption, "content-type": "application/json", location: redirectURL });
+            return;
+        }catch(err) {
+            logger.E("Error in googleCallback: " + err);
+            responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+            return;
+        }
     }
 
     /**
