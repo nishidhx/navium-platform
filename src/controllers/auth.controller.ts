@@ -5,7 +5,7 @@ import { safeWrapper } from "../utils/wrappers/safe.js";
 import { NAVIUM_PHRASES } from "../lib/navium_plt_phr/navium.phrases.js";
 import { MessageKey } from "../lib/navium_plt_phr/message.key.js";
 import type { ServerRequest } from "../types/server.js";
-import { METHODS, type ServerResponse } from "node:http";
+import { METHODS, Server, type ServerResponse } from "node:http";
 import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
 import { _createHashStringPLT } from "../lib/conversions/hashing.js";
 
@@ -65,6 +65,41 @@ export class AuthController {
                 return;
             }
         })();
+        if (error) {
+                logger.E(error.message);
+                responseBody(request, response, 417, { message: NAVIUM_PHRASES[MessageKey.NAVIUM_PLT_CR_F] }, NAVIUM_PHRASES[MessageKey.NAVIUM_PLT_CR_F],  LoggerLevel.WARN); 
+            }
+
+        return data;
     }
 
+    /**
+     * @method navium_plt_checkIn - logins user in .
+     * @param {ServerRequest} request - request object.
+     * @param {ServerResponse} response - response object.
+     */
+    public static async navium_plt_checkIn(request: ServerRequest, response: ServerResponse) {
+        logger.I(`${"[navium_plt_checkIn]"} ` + NAVIUM_PHRASES[MessageKey.NAVIUM_PLT_CHK_ETR]);
+        const { error } = await safeWrapper(async () => {
+            / * extracting out username and password for user login */
+            const { username, password } = request.body;
+
+            if (!username || !password) {
+                logger.I(NAVIUM_PHRASES[MessageKey.NAVIUM_REG_CREDS]);
+                return { message: NAVIUM_PHRASES[MessageKey.NAVIUM_REG_CREDS ]}
+            }   
+
+            const isAccountExists = prisma.user.findUnique({
+                where: {
+                    username: username
+                }, 
+                select: {
+                    id: true,
+                    
+                }
+            }); 
+
+            return;
+        })();
+    }
 }
