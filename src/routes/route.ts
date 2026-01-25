@@ -193,23 +193,23 @@ export class RouteHandler {
                 }else if (routeSegment !== requestPathSegement) {
                     return { matched: false, params: {}, query: {}, body: {}}
                 }
+            }
 
-                / * Parse Query parameters */
-                const requestQuery: Record<string, string> = {};
-                if (queryString && queryString?.length > 0) {
-                    const pairs = queryString.split("&");
-                    for (const queryPair of pairs) {
-                        const [queryKey, queryValue] = queryPair.split("=");
-                        if (queryKey && RouteHandler.SAFE_QUERY_PARAM_REGEX.test(queryValue ?? "")) {
-                            requestQuery[decodeURIComponent(queryKey)] = decodeURIComponent(queryValue ?? "");
-                        }
+            / * Parse Query parameters after all segments match */
+            const requestQuery: Record<string, string> = {};
+            if (queryString && queryString?.length > 0) {
+                const pairs = queryString.split("&");
+                for (const queryPair of pairs) {
+                    const [queryKey, queryValue] = queryPair.split("=");
+                    if (queryKey && RouteHandler.SAFE_QUERY_PARAM_REGEX.test(queryValue ?? "")) {
+                        requestQuery[decodeURIComponent(queryKey)] = decodeURIComponent(queryValue ?? "");
                     }
                 }
-
-                const requestBody = await RouteHandler.parseRequestBody(request as unknown as IncomingMessage);
-
-                return { matched: true, params: params, query: requestQuery, body: {...requestBody}}
             }
+
+            const requestBody = await RouteHandler.parseRequestBody(request as unknown as IncomingMessage);
+
+            return { matched: true, params: params, query: requestQuery, body: {...requestBody}}
 
         }catch (error) {
             logger.E(`Error validating route path: ${(error as Error).message}`);

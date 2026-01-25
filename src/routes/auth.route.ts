@@ -22,6 +22,7 @@ export class AuthRouter {
      */
     private initializeRoutes() {
         this.routeHandler.addRoute({ method: HTTPMETHOD.POST, path: "/api/v1/register_plt", handler: AuthController.navium_plt_register, description: "checking"});    
+        this.routeHandler.addRoute({ method: HTTPMETHOD.POST, path: "/api/v1/checkin_plt", handler: AuthController.navium_plt_checkIn.bind(AuthController), description: "checking"});    
     }
 
     /**

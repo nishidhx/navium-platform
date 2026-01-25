@@ -57,7 +57,7 @@ class TokenGeneratorService {
     public async generatePLTAuthToken(
         payload: NaviumPayload,
         expiresIn: string | number,
-        secret: string
+        secret?: string
     ): Promise<string> {
         try {
             const PrivateKeyJWK = await importJWK(this.JWT_PRIVATE_KEY, "ES256");
