@@ -208,7 +208,7 @@ export class AuthController {
                 sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
             })
 
-            const redirectURL = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + "/accounts/profile" : "http://localhost:3000//accounts/profile";
+            const redirectURL = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + "/accounts/profile?auth_success=true&plt="+ oauth_user_plt_token : "http://localhost:3000//accounts/profile?auth_success=true&plt="+ oauth_user_plt_token;
 
             responseBody(request, response, 302, { message: "user logged in successfully", authorized: true, token: oauth_user_plt_token }, "user logged in successfully", LoggerLevel.INFO, { "Set-Cookie": setCookieOption, "content-type": "application/json", location: redirectURL });
             return;
@@ -288,6 +288,40 @@ export class AuthController {
         })();
         logger.D("" + error)
         responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+        return;
+    }
+
+    /**
+     * @method checkUserExists - checks the user coming from the redirection is authenticated or not.
+     * @param {ServerRequest} request - request object.
+     * @param {ServerResponse} response - response object.
+     */
+    public static async checkUserExists(request: ServerRequest, response: ServerResponse) {
+        const { error } = await safeWrapper(() => {
+            console.log(request)
+            const cookies: string = "" +request.headers.cookie?.split(";")
+            const cookies_obj = Object.fromEntries(cookies?.split(", ").map(pair => {
+                    const [key, ...value] = pair.split("=");
+                    return [key, value.join("=")]; // handles '=' inside JWT
+                    })
+            );
+            if (!cookies_obj.plt_tk) {
+                responseBody(request, response, 401, { message: "something suspicious detected", authorized: false, callbackUrl: "http://localhost:3000" }, "nav_plt_tk not found for the user authentication", LoggerLevel.WARN, {
+                    location: "http://localhost:3000",
+                })
+                return;
+            }
+
+            const filtered_nav_plt_tk = (cookies_obj.plt_tk as string).substring(0, "navium_plt".length);
+
+            responseBody(request, response, 200, { message: "user exists", authorized: true }, "user exists", LoggerLevel.INFO);
+            return;
+        })();
+        if (error) {
+            logger.E("" + error);
+            responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+            return;
+        }
         return;
     }
 }
