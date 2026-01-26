@@ -201,13 +201,14 @@ export class AuthController {
 
             / * set cookie */
             const setCookieOption = cookie.serialize("plt_tk", oauth_user_plt_token + "navium_plt", {
-                httpOnly: process.env.NODE_ENV === "production",
-                secure: process.env.NODE_ENV === "production",
-                expires: new Date(Date.now() + 7 * 24 * 60 * 60), // 7 days
-                sameSite: "lax",
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production" ? true : false,
+                path: "/",
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+                sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
             })
 
-            const redirectURL = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + "/oauth-success" : "http://localhost:3000/oauth-success";
+            const redirectURL = process.env.FRONTEND_URL ? process.env.FRONTEND_URL + "/accounts/profile" : "http://localhost:3000//accounts/profile";
 
             responseBody(request, response, 302, { message: "user logged in successfully", authorized: true, token: oauth_user_plt_token }, "user logged in successfully", LoggerLevel.INFO, { "Set-Cookie": setCookieOption, "content-type": "application/json", location: redirectURL });
             return;
@@ -275,10 +276,11 @@ export class AuthController {
             }
 
             const setCookieOption = cookie.serialize("plt_tk", generateUserToken + "navium_plt", {
-                httpOnly: process.env.NODE_ENV === "production",
-                secure: process.env.NODE_ENV === "production",
-                expires: new Date(Date.now() + 7 * 24 * 60 * 60), // 7 days
-                sameSite: "lax",
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production" ? true : false,
+                path: "/",
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+                sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
             })
 
             responseBody(request, response, 200, { message: "user logged in successfully", authorized: true, token: generateUserToken, session: sessionTime + "navium_plt" }, "user logged in successfully", LoggerLevel.INFO, { "Set-Cookie": setCookieOption, "content-type": "application/json" });

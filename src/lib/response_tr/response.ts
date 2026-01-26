@@ -48,6 +48,12 @@ export const responseBody = (
       break;
   }
 
-  res.writeHead(statusCode, headers);
+  // Merge default headers with provided headers
+  const finalHeaders = {
+    "Content-Type": "application/json",
+    ...headers,
+  };
+
+  res.writeHead(statusCode, finalHeaders);
   res.end(JSON.stringify({ ...message }));
 };

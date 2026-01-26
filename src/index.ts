@@ -14,9 +14,11 @@ routeHandler.addRouteFrom(authRouter._get_auth_routes());
 
 const server = http.createServer((req, res) => {
     / * Set CORS headers */
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     
     /* Handle OPTIONS request for CORS preflight */
     if (req.method === 'OPTIONS') {
