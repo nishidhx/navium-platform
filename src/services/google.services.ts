@@ -5,8 +5,6 @@ import "dotenv/config"
 const GOOGLE_CLIENT_ID = process.env.NAVIUM_PLT_GOOGLE_OAUTH_CLIENT_ID || "";
 const GOOGLE_CLIENT_SECRET = process.env.NAVIUM_PLT_GOOGLE_OAUTH_CLIENT_SECRET || "";
 
-
-
 /**
  * @constant GoogleOAuthClient
  * @type {OAuth2Client}
