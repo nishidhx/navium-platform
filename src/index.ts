@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { RouteHandler } from './routes/route.js';
 import type { ServerRequest } from './types/server.js';
 import { AuthRouter } from './routes/auth.route.js';
+import { UserAccRouter } from './routes/userAcc.route.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -10,6 +11,8 @@ const routeHandler = RouteHandler.getInstance();
 
 const authRouter = new AuthRouter();
 routeHandler.addRouteFrom(authRouter._get_auth_routes());
+const userAccRouter = new UserAccRouter();
+routeHandler.addRouteFrom(userAccRouter._get_user_acc_routes());
 
 
 const server = http.createServer((req, res) => {

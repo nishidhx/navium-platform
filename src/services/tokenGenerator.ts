@@ -86,12 +86,12 @@ class TokenGeneratorService {
         try {
             / * use the static class directly to avoid reliance on `this` (which can be undefined when the method is called as an unbound function after import) /
             const publicKeyJWK = await importJWK(TokenGeneratorService.JWT_PUBLIC_KEY, "ES256");
-            logger.D(`[${this.verifyPLTAuthToken.name}]` + ": " + `Verifying Token: ${publicKeyJWK}` );
+            logger.D(`[{this.verifyPLTAuthToken.name}]` + ": " + `Verifying Token: ${publicKeyJWK}` );
             const { payload } = await jwtVerify(token, publicKeyJWK);
             logger.D(`Token verified successfully. Payload: ${JSON.stringify(payload)}`);
             return payload as JWTPayload;
         }catch(error) {
-            logger.E("Error verifying PLT auth token: " + (error as Error).message);
+            logger.E("Error verifying PLT auth token: " + error);
             return null;
         }
     }

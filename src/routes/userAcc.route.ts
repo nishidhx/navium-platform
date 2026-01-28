@@ -1,4 +1,5 @@
 import { UserAccController } from "../controllers/userAcc.controller.js";
+import { AuthMiddleware } from "../middlewares/authMiddleware.js";
 import { HTTPMETHOD } from "../types/routes.js";
 import { RouteHandler } from "./route.js";
 
@@ -21,7 +22,7 @@ export class UserAccRouter {
      * Routes Initializers
      */
     private initializeRoutes() {
-        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/user/account", handler: UserAccController.getUserProfile, description: "to get the user account"});    
+        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/user/account", handler: UserAccController.getUserProfile, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthenticAndFetchData], description: "to get the user account"});    
     }
 
     /**
