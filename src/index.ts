@@ -4,6 +4,7 @@ import { RouteHandler } from './routes/route.js';
 import type { ServerRequest } from './types/server.js';
 import { AuthRouter } from './routes/auth.route.js';
 import { UserAccRouter } from './routes/userAcc.route.js';
+import WebSocket, { WebSocketServer } from 'ws';
 
 const PORT = process.env.PORT || 3001;
 
@@ -22,7 +23,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
+
     /* Handle OPTIONS request for CORS preflight */
     if (req.method === 'OPTIONS') {
         res.writeHead(204);
@@ -34,26 +35,19 @@ const server = http.createServer((req, res) => {
     routeHandler.handleRequestRoute(req as ServerRequest, res);
 });
 
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-    }
-});
+const wss = new WebSocketServer({
+    server: server
+})
 
-io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-    
-
-    socket.on("message", (msg) => {
-        console.log("Message received:", msg);
-        io.emit("message", msg);
+wss.on("connection", (ws) => {
+    console.log("client connected");
+    ws.on("close", () => {
+         console.log("client disconnected");
     })
 
-    io.emit("welcome", "Welcome to the Socket.io server!");
-
-    socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
-    });
+    ws.on('message', (message) => {
+        console.log("message: ", message.toString("utf8"));
+    })
 })
 
 server.listen(PORT, () => {
