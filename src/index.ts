@@ -5,6 +5,7 @@ import type { ServerRequest } from './types/server.js';
 import { AuthRouter } from './routes/auth.route.js';
 import { UserAccRouter } from './routes/userAcc.route.js';
 import WebSocket, { WebSocketServer } from 'ws';
+import { InitSocket } from './scoket/index.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -35,20 +36,9 @@ const server = http.createServer((req, res) => {
     routeHandler.handleRequestRoute(req as ServerRequest, res);
 });
 
-const wss = new WebSocketServer({
-    server: server
-})
+const wss = new WebSocketServer({ server: server })
 
-wss.on("connection", (ws) => {
-    console.log("client connected");
-    ws.on("close", () => {
-         console.log("client disconnected");
-    })
-
-    ws.on('message', (message) => {
-        console.log("message: ", message.toString("utf8"));
-    })
-})
+InitSocket(wss);
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
