@@ -14,14 +14,7 @@ export class UserAccController {
     public static async getUserProfile(request: ServerRequest, response: ServerResponse) {
         const { error } = await safeWrapper(() => {
             / * * Fetch user profile from request object, which is populated by auth middleware */           
-            logger.D(request.token);
-            logger.D(JSON.stringify(request.user));
-
-
-            if (request.user.authentic) {
-                responseBody(request, response, 200, { message: "User profile fetched successfully", user: request.user }, "user profile fetched", LoggerLevel.INFO);
-            }
-
+            
         })();
 
         if (error) {
