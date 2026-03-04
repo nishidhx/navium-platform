@@ -7,7 +7,7 @@ import type { NextFunction } from "../types/middleware.js";
 import verifyPLTAuthToken from "../services/tokenGenerator.js";
 import { extname } from "node:path";
 import { prisma } from "../lib/prisma/prisma.js";
-import { userSafeSelect } from "../selections/userSelect.js";
+import { prismaUserSafeSelect } from "../selections/userSelect.js";
 
 
 
@@ -107,7 +107,7 @@ export class AuthMiddleware {
                 where: {
                     username: extractedUserPayload.username,
                     email: extractedUserPayload.email
-                },select : userSafeSelect
+                },select : prismaUserSafeSelect
             })
 
             if (!checkUserExists) { responseBody(request, response, 401, { message: "user not found", authorized: false, session: AuthMiddleware.getSessionTime() }, "user not found", LoggerLevel.INFO); return;};
