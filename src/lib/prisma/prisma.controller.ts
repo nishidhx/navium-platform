@@ -69,9 +69,6 @@ export class PrismaController {
                 logger.E("Error fetching user by username: " + (err as Error).message); 
                 return null;
             };
-        }
-
-
-        
+        }        
     
 }
