@@ -1,8 +1,9 @@
-import type { User } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import { logger } from "../../utils/logger/index.js";
 import { prismaUserSafeSelect } from "../../selections/userSelect.js";
 import type { userSafeSelect } from "../../types/user.js";
+import type { userPostSelect } from "../../types/prisma.types.js";
+import { userPostSafeSelect } from "../../selections/postSelect.js";
 
 
 export class PrismaController {
@@ -21,6 +22,12 @@ export class PrismaController {
                 },
                 select: selections ? selections : prismaUserSafeSelect
             })
+
+            if (!navium_plt_user) {
+                logger.E("navium plt user not foundd with userId" + userId);
+            }
+            
+            logger.E("navium plt user  foundd with userId" + userId);
 
             return navium_plt_user ? navium_plt_user : null;
         }catch (err) {
@@ -64,6 +71,10 @@ export class PrismaController {
                     select: selections ? selections : prismaUserSafeSelect
                 })
 
+                if (!navium_plt_user) {
+                    logger.W("user not found wiht userId: " + username);
+                }
+
                 return navium_plt_user ? navium_plt_user : null;
             }catch (err) {
                 logger.E("Error fetching user by username: " + (err as Error).message); 
@@ -71,4 +82,24 @@ export class PrismaController {
             };
         }        
     
+    static async getPostById(postId: string, selections?: object): Promise<userPostSelect | null> {
+        try {
+            const navium_plt_user_post = await  prisma.post.findUnique({
+                where: {
+                    id: postId
+                },
+                select: (selections || userPostSafeSelect) as typeof userPostSafeSelect
+            })
+
+            if (!navium_plt_user_post) {
+                logger.E("user post not found");
+            }
+
+            // @ts-ignore
+            return navium_plt_user_post ? navium_plt_user_post : null
+        }catch(err) {
+            return null
+
+        }
+    }
 }

@@ -74,8 +74,8 @@ export interface Media {
   id: string;
   url?: string;
   type?: MediaType;
-  postId: string;
-  post: userPostSelect;
+  postId?: string;
+  post?: userPostSelect;
 }
 
 export interface userCommentSelect {
