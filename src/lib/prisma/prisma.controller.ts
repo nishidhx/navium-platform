@@ -4,6 +4,7 @@ import { prismaUserSafeSelect } from "../../selections/userSelect.js";
 import type { userSafeSelect } from "../../types/user.js";
 import type { userPostSelect } from "../../types/prisma.types.js";
 import { userPostSafeSelect } from "../../selections/postSelect.js";
+import type { Post } from "@prisma/client";
 
 
 export class PrismaController {
@@ -93,6 +94,7 @@ export class PrismaController {
 
             if (!navium_plt_user_post) {
                 logger.E("user post not found");
+                return null;
             }
 
             // @ts-ignore
@@ -100,6 +102,31 @@ export class PrismaController {
         }catch(err) {
             return null
 
+        }
+    }
+
+    static async  getPostsByUser(userId: string): Promise<Post[] | null> {
+        try {
+            const navium_plt_user_posts = await prisma.user.findFirst({
+                where: {
+                    id: userId
+                },
+                select: {
+                    posts: true
+                }
+            })
+
+            if (!navium_plt_user_posts) {
+                logger.E("no post found associated with the user with userID: " + userId);
+                return null;
+            }
+
+            // @ts-ignore
+            return navium_plt_user_posts ? navium_plt_user_posts : null;
+
+        }catch(err) {
+            logger.E("failed to fetch users from the postgres db");
+            return null;
         }
     }
 }
