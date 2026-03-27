@@ -4,6 +4,7 @@ import { safeWrapper } from "../utils/wrappers/safe.js";
 import { logger } from "../utils/logger/index.js";
 import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
 import { userAuthSelect } from "../selections/userSelect.js";
+import { PrismaController } from "../lib/prisma/prisma.controller.js";
 
 
 
@@ -18,6 +19,22 @@ export class UserAccController {
             const condition_check = Boolean(request.user2 && request.user.id && request.token);        
             logger.W(">>>>>>>>> condition_check: " + condition_check );
             return {user: 1};
+        const { error } = await safeWrapper(async () => {
+            / * * Fetch user profile from request object, which is populated by auth middleware */           
+
+            if (request.user.authentic) {
+
+                const userProfile = await PrismaController.getUserById(request.user.id);
+
+                if (!userProfile) {
+                    responseBody(request, response, 404, { message: "user not found", authentic: false}, "user not found in db", LoggerLevel.WARN);
+                }
+
+                responseBody(request, response, 200, { message: "User profile fetched successfully", user: request.user }, "user profile fetched", LoggerLevel.INFO);
+            }
+
+
+
         })();
 
         if (error) {

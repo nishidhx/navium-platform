@@ -1,4 +1,4 @@
-export const userSafeSelect = {
+export const prismaUserSafeSelect = {
     id: true,
     username: true,
     firstname: true,
