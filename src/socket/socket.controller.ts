@@ -1,5 +1,7 @@
-import type { WebSocket } from "ws";
+import { WebSocket } from "ws";
 import type { Server } from "ws";
+import { generateUniqueId } from "../lib/id/generateUniqueId.js";
+import { clients } from "./index.js";
 
 
 
@@ -25,7 +27,7 @@ export class SocketController {
      * method to get the singleton instance of SocketContoller
      * @returns {SocketController}
      */
-    getInstance() {
+    getInstance(): SocketController {
         if (!SocketController.SocketControllerInstance) {
             SocketController.SocketControllerInstance = new SocketController(this.ws_server_io, this.ws_server_sockets);
             return SocketController.SocketControllerInstance;
@@ -41,5 +43,32 @@ export class SocketController {
         this.ws_server_sockets.on("message", (mesage) => {
             console.log("message: " + mesage.toString("utf8"));
         })
+    }
+
+    
+    /**
+     * Emits the to all the clients
+     */
+    static broadcast(event: string, payload: any) {
+        const extracted_data_payload = JSON.stringify({event, payload});
+
+        for (const client of clients.values()) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(extracted_data_payload);
+            }
+        }
+    }
+
+    /**
+     * send to client via it's clientId.
+     */
+    static sendToClient(clientId: string, event: string, payload: any) {
+        const extracted_data_payload = JSON.stringify({ event, payload });
+
+        const ws_client = clients.get(clientId);
+
+        if (ws_client && ws_client.readyState === WebSocket.OPEN) {
+            ws_client.send(extracted_data_payload);
+        }
     }
 }
