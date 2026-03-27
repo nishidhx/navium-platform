@@ -5,7 +5,7 @@ import type { ServerRequest } from './types/server.js';
 import { AuthRouter } from './routes/auth.route.js';
 import { UserAccRouter } from './routes/userAcc.route.js';
 import WebSocket, { WebSocketServer } from 'ws';
-import { InitSocket } from './scoket/index.js';
+import { InitSocket } from './socket/index.js';
 
 const PORT = process.env.PORT || 3001;
 
