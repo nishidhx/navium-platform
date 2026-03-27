@@ -1,10 +1,10 @@
+import type { WebSocket } from "ws";
 import { logger } from "../utils/logger/index.js";
 import { clients } from "./index.js";
 import { SocketController } from "./socket.controller.js";
 
 
 export class SocketEvents {
-
     /**
      * handles user message
      */
@@ -45,20 +45,38 @@ export class SocketEvents {
      */
     static handleEvents(ws: WebSocket, clientId: string, raw: string) {
         try {
-            const { event, data } = JSON.parse(raw);
+            const payload = JSON.parse(raw);
 
-            switch (event) {
-                case "message": 
-                    this.handleEvents(ws, clientId, data);
-                    break;
-                case "ping":
-                    ws.send(JSON.stringify({ event: "pong" }));
-                    break;
-                case "private_message": 
-                    this.handleOneToOneMessage(ws, clientId, event, data);
+            if (payload && typeof payload === "object" && "event" in payload) {
+                const { event, data } = payload;
+
+                switch (event) {
+                    case "message":
+                        this.handleMessage(ws, clientId, data);
+                        break;
+                    case "ping":
+                        ws.send(JSON.stringify({ event: "pong" }));
+                        break;
+                    case "private_message":
+                        this.handleOneToOneMessage(ws, clientId, event, data);
+                        break;
+                    default:
+                        logger.W("Unknown socket event: " + event);
+                        break;
+                }
+            } else {
+                // Fallback: raw text message broadcast
+                this.handleMessage(ws, clientId, raw);
             }
-        }catch(err) {
+        } catch (err) {
+            // If raw text is not JSON, broadcast it as plain text.
+            if (typeof raw === "string" && raw.trim().length > 0) {
+                this.handleMessage(ws, clientId, raw);
+                return;
+            }
 
+            logger.E("SocketEvents.handleEvents error: " + err);
+            ws.send(JSON.stringify({ event: "error", data: "Invalid message format" }));
         }
     }
     
