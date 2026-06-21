@@ -15,30 +15,14 @@ export class UserAccController {
      */
     public static async getUserProfile(request: ServerRequest, response: ServerResponse) {
         const { data, error } = await safeWrapper(() => {
-            / * * Fetch user profile from request object, which is populated by auth middleware */   
-            const condition_check = Boolean(request.user2 && request.user.id && request.token);        
-            logger.W(">>>>>>>>> condition_check: " + condition_check );
-            return {user: 1};
-        const { error } = await safeWrapper(async () => {
-            / * * Fetch user profile from request object, which is populated by auth middleware */           
-
-            if (request.user.authentic) {
-
-                const userProfile = await PrismaController.getUserById(request.user.id);
-
-                if (!userProfile) {
-                    responseBody(request, response, 404, { message: "user not found", authentic: false}, "user not found in db", LoggerLevel.WARN);
-                }
-
-                responseBody(request, response, 200, { message: "User profile fetched successfully", user: request.user }, "user profile fetched", LoggerLevel.INFO);
-            }
-
-
+            responseBody(request, response, 200, {
+                message: "welcome to navium platform"
+            }, "User reached get user profile", LoggerLevel.INFO)
 
         })();
 
         if (error) {
-            logger.E("Error fetching user profile: " + error.message);
+            logger.E("Error fetching user profile: " + error?.message);
             responseBody(request, response, 500, { message: "Internal Server Error" }, "error fetching user profile", LoggerLevel.ERROR);
         }
 
@@ -50,5 +34,4 @@ export class UserAccController {
         responseBody(request, response, 200, { message: "user unauthorized", user: {/* user data */} }, "user unauthorized", LoggerLevel.INFO);
         return;
     }
-    
 }

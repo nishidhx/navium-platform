@@ -99,7 +99,6 @@ export class AuthController {
             const oauth_url = GoogleAuthService.generateGoogleOAuthURL();
             logger.I("Google's oauth url: " + oauth_url);
             if (!oauth_url) {
-                logger.W("Google oauth url not found");
                 responseBody(request, response, 500, { message: "failed to generate google oauth url" }, "failed to generate google oauth url", LoggerLevel.ERROR);
                 return;
             }
@@ -124,11 +123,9 @@ export class AuthController {
     public static async googleCallback(request: ServerRequest, response: ServerResponse): Promise<void> {
         try {
             const search = new URL(request.url ?? "/", "http://localhost:3001").searchParams;
-            logger.I("google callback search params: " + search);
 
             / * extracting code from search parameters from the request url */
             const _google_oauth_code = search.get("code");
-            logger.I("google_oauth_code: " + _google_oauth_code);
             
             if (!_google_oauth_code) {
                 responseBody(request, response, 401, { message: "google oauth code not found" }, "google oauth code not found", LoggerLevel.WARN);
@@ -168,10 +165,12 @@ export class AuthController {
             });
 
             if (!google_oauth_user) {
+                const now = new Date();
+                const timeStamp = now.getMilliseconds();
                 google_oauth_user = await prisma.user.create({
                     data: {
                         email: email,
-                        username: email.split("@")[0] ?? "name" + "_google" + Date.now(),
+                        username: email.split("@")[0] ? email.split("@")[0] + timeStamp.toString() + Math.random() * 100 : "name" + "_google" + Date.now(),
                         firstname: name.split(" ")[0] ?? "Google",
                         lastname: name.split(" ")[1] ?? "User",
                         phone_number: phone_number ?? "0000000000",

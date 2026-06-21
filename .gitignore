@@ -30,7 +30,6 @@ Thumbs.db
 
 *.tsbuildinfo
 
-prisma/migrations/
 prisma/dev.db
 prisma/dev.db-journal
 

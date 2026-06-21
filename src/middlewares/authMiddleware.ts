@@ -26,7 +26,6 @@ export class AuthMiddleware {
     public static async extractToken(request: ServerRequest, response: ServerResponse, next: NextFunction) {
         const { data, error } = await safeWrapper((): string | null => {
             logger.I("Extracting token from cookies");
-            console.log("Cookies: ", request.headers);
             const cookies = "" + request.headers.cookie?.split(";");
             const cookies_obj = Object.fromEntries(cookies.split(",").map(cooke => {
                 const [key, ...value] = cooke.trim().split("=");
@@ -65,7 +64,6 @@ export class AuthMiddleware {
         const { data, error } = await safeWrapper(async () => {
             / * get token from the request Object */
             const plt_tk_token = request.token ? request.token : "";
-            logger.I(plt_tk_token)
             if (!plt_tk_token) {
                 responseBody(request, response, 401, { message: "something suspicious detected", authorized: false, session: AuthMiddleware.getSessionTime() }, "unable to extract plt_tk token from the request Object", LoggerLevel.DEBUG);
                 return;

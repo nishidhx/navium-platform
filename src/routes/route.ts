@@ -82,8 +82,8 @@ export class RouteHandler {
                 for (const route of routes) {
                 const isRouteMactched = await RouteHandler.validateRoutePath(route.path, requestPathname || "", request as unknown as Http2ServerRequest);
                 const isEndpointSafe = RouteHandler.validateRouteEndpoint(route.path, requestPathname);
-                logger.W(`Route Endpoint Safe: ${isEndpointSafe} : ${requestPathname}`)
-                logger.D(`Route match result for [${route.method}] ${route.path}: ${isRouteMactched?.matched}`);
+                // logger.W(`Route Endpoint Safe: ${isEndpointSafe} : ${requestPathname}`)
+                // logger.D(`Route match result for [${route.method}] ${route.path}: ${isRouteMactched?.matched}`);
 
                 if (route.method === requestMethod && isRouteMactched?.matched) {
                     request.params = isRouteMactched.params ?? {}
@@ -164,7 +164,7 @@ export class RouteHandler {
 
             / * Early return if segment lengths do not match */
             if (routePathSegements.length !== requestPathSegements?.length) {
-                logger.D(`Segment length mismatch: routeSegments=${routePathSegementsLength}, requestSegments=${requestPathSegementsLength}, routePath=${routePath}, requestPath=${requestPath}`);
+                // logger.D(`Segment length mismatch: routeSegments=${routePathSegementsLength}, requestSegments=${requestPathSegementsLength}, routePath=${routePath}, requestPath=${requestPath}`);
                 return { matched: false, params: {}, query: {}, body: {}};
             }
 

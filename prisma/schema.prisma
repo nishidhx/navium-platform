@@ -29,7 +29,7 @@ model User {
   username     String   @unique
   firstname    String
   lastname     String   @default("")
-  phone_number String 
+  phone_number String
   email        String   @unique
   hash_pass    String
   DOB          DateTime
