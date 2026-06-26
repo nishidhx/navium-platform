@@ -26,6 +26,8 @@ export class AuthRouter {
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/google", handler: AuthController.navium_plt_google_oauth, description: "google oauth" });
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/google/callback", handler: AuthController.googleCallback, description: "google oauth" });
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/authenticate/user", handler: AuthController.checkUserExists, description: "authenticate does the user exists oauth" });
+        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/github", handler: AuthController.githubAuth, description: "Github Oauth"});
+        this.routeHandler.addRoute({ method: HTTPMETHOD.POST, path: "/api/v1/auth/github/callback", handler: AuthController.githubCallback, description: "Github Oauth callback route"})
     }
 
     /**

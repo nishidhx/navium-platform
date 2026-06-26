@@ -5,12 +5,13 @@ import { safeWrapper } from "../utils/wrappers/safe.js";
 import { NAVIUM_PHRASES } from "../lib/navium_plt_phr/navium.phrases.js";
 import { MessageKey } from "../lib/navium_plt_phr/message.key.js";
 import type { ServerRequest } from "../types/server.js";
-import { METHODS, Server, type ServerResponse } from "node:http";
+import { type ServerResponse } from "node:http";
 import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
 import { _compareHashPLTpass, _createHashStringPLT } from "../lib/conversions/hashing.js";
 import { generatePLTAuthToken } from "../services/tokenGenerator.js";
 import cookie from "cookie";
 import { GoogleAuthService } from "../services/google.services.js";
+import axios from "axios"
 
 export class AuthController {
 
@@ -108,7 +109,7 @@ export class AuthController {
 
         if (error) {
             logger.E("" + error);
-            responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+            responseBody(request, response, 500, { message: "internal server error" }, "internal server error " + "navium_plt_google_oauth", LoggerLevel.ERROR);
             return;
         }
         responseBody(request, response, 501, { message: "not implemented yet" }, "not implemented yet", LoggerLevel.WARN);
@@ -151,7 +152,9 @@ export class AuthController {
             / * destructure google user */
             const { email, googleId, name, picture, DOB, phone_number } = _google_user;
 
-            let google_oauth_user = await prisma.user.findUnique({
+            logger.D(email)
+
+            let google_oauth_user = await prisma.user.findFirst({
                 where: {
                     email: email
                 }, 
@@ -213,7 +216,7 @@ export class AuthController {
             return;
         }catch(err) {
             logger.E("Error in googleCallback: " + err);
-            responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
+            responseBody(request, response, 500, { message: "internal server error" }, "internal server error " + "googleCallback", LoggerLevel.ERROR);
             return;
         }
     }
@@ -321,6 +324,78 @@ export class AuthController {
             responseBody(request, response, 500, { message: "internal server error" }, "internal server error", LoggerLevel.ERROR);
             return;
         }
+        return;
+    }
+
+
+    /**
+     * @method githubAuth - user is redirected to github asks for permission.
+     */
+    public static async githubAuth(request: ServerRequest, response: ServerResponse) {
+        const { error } = await safeWrapper(() => {
+            const params = new URLSearchParams({
+                client_id: process.env.GITHUB_CLIENT_ID!,
+                redirect_url: process.env.GITHUB_CALLBACK!,
+                scope: "read:user user:email"
+            });
+
+            if (!params) {
+                logger.I("" + params);
+                responseBody(request, response, 400, {message: "params not generated"}, "params are not generated: githubAuth", LoggerLevel.INFO);
+                return;
+            }
+
+             responseBody(request, response, 302, {}, "redirecting to google oauth", LoggerLevel.INFO, { Location: `https://github.com/login/oauth/authorize?${params}` });
+             return;
+        })();  
+        
+        if (error) {
+            logger.E("" + error);
+            responseBody(request, response, 404, { message: "internal server error"}, "internal server error: githubAuth", LoggerLevel.INFO)
+            return;
+        }
+ 
+        responseBody(request, response, 501, { message: "not implemented yet" }, "not implemented yet", LoggerLevel.WARN);
+        return;
+    }
+
+    /**
+     * @method githubCallback 
+     */
+    public static async githubCallback(request: ServerRequest, response: ServerResponse) {
+        const {error} = await safeWrapper( async () => {
+            const { code } = request.query;
+            const tokenRes = await axios.post("https://github.com/login/oauth/access_token", 
+                {
+                    client_id: process.env.GITHUB_CLIENT_ID!,
+                    redirect_url: process.env.GITHUB_CALLBACK!,
+                    code
+                },
+                {
+                    headers: {
+                        Accept: "application/json"
+                    }
+                }
+            );
+            
+            const access_token = tokenRes.data.access_token;
+
+            if (access_token) {
+                logger.I("Access Token: " + access_token);
+                responseBody(request, response, 200, { message: "access token has been generated", access_token: access_token }, "Access token has been generated", LoggerLevel.INFO);
+                return
+            }
+
+            
+        })();
+
+        if (error) {
+            logger.E("" + error);
+            responseBody(request, response, 404, { message: "O Auth failed"}, "internal server error: githubCallback", LoggerLevel.INFO)
+            return;
+        }
+ 
+        responseBody(request, response, 501, { message: "not implemented yet: O Auth failed" }, "not implemented yet", LoggerLevel.WARN);
         return;
     }
 }
