@@ -6,6 +6,7 @@ import { AuthRouter } from './routes/auth.route.js';
 import { UserAccRouter } from './routes/userAcc.route.js';
 import WebSocket, { WebSocketServer } from 'ws';
 import { InitSocket } from './socket/index.js';
+import { GraphQLRoutes } from './routes/graphql.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -15,6 +16,8 @@ const authRouter = new AuthRouter();
 routeHandler.addRouteFrom(authRouter._get_auth_routes());
 const userAccRouter = new UserAccRouter();
 routeHandler.addRouteFrom(userAccRouter._get_user_acc_routes());
+const GraphQLRouter = new GraphQLRoutes();
+routeHandler.addRouteFrom(GraphQLRouter._get_graphql_routes());
 
 
 const server = http.createServer((req, res) => {

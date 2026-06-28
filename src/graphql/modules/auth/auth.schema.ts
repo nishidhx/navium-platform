@@ -1,6 +1,6 @@
 import { gql } from "graphql-tag";
 
-export const authTypeDefs = gql`
+export const authTypeDefs = `
   type AuthPayload {
     token: String!
     user: User!

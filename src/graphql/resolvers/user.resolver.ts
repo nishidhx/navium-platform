@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma/prisma.js";
 export const userResolvers = {
   Query: {
     getUser: async (_: any, { username }: any) => {
-      return prisma.user.findUnique({
+      return await prisma.user.findUnique({
         where: { username }
       });
     }
