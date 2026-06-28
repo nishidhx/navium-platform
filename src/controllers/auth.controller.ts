@@ -398,4 +398,12 @@ export class AuthController {
         responseBody(request, response, 501, { message: "not implemented yet: O Auth failed" }, "not implemented yet", LoggerLevel.WARN);
         return;
     }
+
+
+    /**
+     * @method getUserMain
+     */
+    public static async getUserMain()  {
+
+    }
 }

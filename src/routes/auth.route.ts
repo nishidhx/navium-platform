@@ -1,4 +1,5 @@
 import { AuthController } from "../controllers/auth.controller.js";
+import { AuthMiddleware } from "../middlewares/authMiddleware.js";
 import { HTTPMETHOD } from "../types/routes.js";
 import { RouteHandler } from "./route.js";
 
@@ -28,6 +29,10 @@ export class AuthRouter {
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/authenticate/user", handler: AuthController.checkUserExists, description: "authenticate does the user exists oauth" });
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/auth/github", handler: AuthController.githubAuth, description: "Github Oauth"});
         this.routeHandler.addRoute({ method: HTTPMETHOD.POST, path: "/api/v1/auth/github/callback", handler: AuthController.githubCallback, description: "Github Oauth callback route"})
+        
+        // User Session Routes
+        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/user", handler: AuthController.getUserMain, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic], description: "this route is used to check user is authenticated or not."})
+    
     }
 
     /**
