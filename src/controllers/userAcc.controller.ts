@@ -52,6 +52,8 @@ export class UserAccController {
      * @method getUserTalk
      */
     public static async getUserTalk(request: ServerRequest, response: ServerResponse) {
-
+        const { data, error } = await safeWrapper(async () => {
+            
+        })();
     }
 }
