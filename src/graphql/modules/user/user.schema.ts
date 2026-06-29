@@ -45,7 +45,7 @@ export const userTypeDefs = `
     }    
 
     extend type Query {
-        getUser(username: String!): User
+        getUser: User
     }
 
     extend type Mutation {

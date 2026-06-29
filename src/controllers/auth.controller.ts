@@ -403,7 +403,7 @@ export class AuthController {
     /**
      * @method getUserMain
      */
-    public static async getUserMain()  {
-
+    public static async getUserMain(request: ServerRequest, response: ServerResponse)  {
+        logger.I("Reached get user info: " + JSON.stringify(request.user));
     }
 }

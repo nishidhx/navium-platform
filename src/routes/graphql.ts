@@ -1,4 +1,5 @@
 import { GraphQLController } from "../controllers/graphql.controller.js";
+import { AuthMiddleware } from "../middlewares/authMiddleware.js";
 import { HTTPMETHOD } from "../types/routes.js";
 import { RouteHandler } from "./route.js";
 
@@ -17,7 +18,7 @@ export class GraphQLRoutes  {
     }
 
     private initializeRoutes() {
-        this.routeHandler.addRoute({method: HTTPMETHOD.POST, path: "/api/v1/graphql", handler: GraphQLController.graphqlHandler})
+        this.routeHandler.addRoute({method: HTTPMETHOD.POST, path: "/api/v1/graphql", handler: GraphQLController.graphqlHandler, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic]})
     }
 
 

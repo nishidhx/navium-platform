@@ -3,8 +3,9 @@ import type { ServerRequest } from "../types/server.js";
 import { safeWrapper } from "../utils/wrappers/safe.js";
 import { logger } from "../utils/logger/index.js";
 import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
-import { userAuthSelect } from "../selections/userSelect.js";
+import { prismaUserSafeSelect, userAuthSelect } from "../selections/userSelect.js";
 import { PrismaController } from "../lib/prisma/prisma.controller.js";
+import { prisma } from "../lib/prisma/prisma.js";
 
 
 
@@ -14,10 +15,21 @@ export class UserAccController {
      * @method getUserProfile - Get the profile of the user.
      */
     public static async getUserProfile(request: ServerRequest, response: ServerResponse) {
-        const { data, error } = await safeWrapper(() => {
-            responseBody(request, response, 200, {
-                message: "welcome to navium platform"
-            }, "User reached get user profile", LoggerLevel.INFO)
+        const { data, error } = await safeWrapper(async () => {
+            const { username, email } = request.user;
+
+            const user = await prisma.user.findUnique({
+                where: {    
+                    username: username,
+                    email: email
+                }, select: prismaUserSafeSelect
+            }) 
+
+            if (user) {
+                return user;
+            }
+
+            throw new Error("User not found");
 
         })();
 
@@ -27,11 +39,19 @@ export class UserAccController {
         }
 
         if (data) {
-            responseBody(request, response, 200, { message: "user authorized", user: data }, "user authorized", LoggerLevel.INFO);
+            const safeData = JSON.parse(JSON.stringify(data));
+            responseBody(request, response, 200, { message: "user authorized", data: safeData }, "user authorized", LoggerLevel.INFO);
             return;
         }
 
         responseBody(request, response, 200, { message: "user unauthorized", user: {/* user data */} }, "user unauthorized", LoggerLevel.INFO);
         return;
+    }
+
+    /**
+     * @method getUserTalk
+     */
+    public static async getUserTalk(request: ServerRequest, response: ServerResponse) {
+
     }
 }

@@ -74,7 +74,7 @@ export class AuthMiddleware {
             const extractTokenPayload = await verifyPLTAuthToken(filtered_nav_plt_tk); 
 
             logger.I(JSON.stringify(extractTokenPayload))
-            if (!extractTokenPayload) { responseBody(request, response, 401, { message: "Token isn't authenticated", authorized: false, session: AuthMiddleware.getSessionTime() }, "unable to extract payload from the token", LoggerLevel.WARN); return;}
+            if (!extractTokenPayload) { responseBody(request, response, 401, { message: "Token isn't authenticated or might be expired", authorized: false, session: AuthMiddleware.getSessionTime() }, "unable to extract payload from the token", LoggerLevel.WARN); return;}
 
             return { user: extractTokenPayload.username, email: extractTokenPayload.email, DOB: extractTokenPayload.date_of_birth }
         })()

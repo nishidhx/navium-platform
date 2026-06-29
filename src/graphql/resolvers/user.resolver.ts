@@ -3,7 +3,13 @@ import { prisma } from "../../lib/prisma/prisma.js";
 
 export const userResolvers = {
   Query: {
-    getUser: async (_: any, { username }: any) => {
+    getUser: async (_: any, _args: any, context: any) => {
+      const username = context?.user ?? context?.username;
+
+      if (!username) {
+        throw new Error("Unauthorized");
+      }
+
       return await prisma.user.findUnique({
         where: { username }
       });
