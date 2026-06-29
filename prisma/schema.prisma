@@ -17,11 +17,29 @@ enum MediaType {
   VIDEO
 }
 
+enum AttachmentType {
+  IMAGE
+  VIDEO
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
 enum PostType {
   TEXT
   IMAGE
   VIDEO
   MIXED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  FILE
+  POST_SHARE
 }
 
 model User {
@@ -39,6 +57,10 @@ model User {
   followers Follow[] @relation("followers")
   following Follow[] @relation("following")
 
+  conversationParticipants ConversationParticipant[]
+  sentMessages             Message[]
+  messageReads             MessageRead[]
+
   likes          Like[]
   reposts        Repost[]
   comments       Comment[]
@@ -47,6 +69,83 @@ model User {
   Bookmarks      Bookmark[]
 
   createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id String @id @default(uuid())
+
+  type ConversationType
+
+  name     String?
+  imageUrl String?
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConversationParticipant {
+  id String @id @default(uuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  joinedAt DateTime @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model MessageAttachment {
+  id String @id @default(uuid())
+
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id])
+
+  url String
+
+  type AttachmentType
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  content String
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
+
+  attachments MessageAttachment[]
+
+  reads MessageRead[]
+
+  type MessageType
+
+  createdAt DateTime @default(now())
+}
+
+model MessageRead {
+  id String @id @default(uuid())
+
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  readAt DateTime @default(now())
+
+  @@unique([messageId, userId])
 }
 
 model Post {
@@ -66,6 +165,7 @@ model Post {
   bookmarks Bookmark[]
   views     View[]
   Analytics Analytics?
+  messages  Message[]
 }
 
 model Follow {
