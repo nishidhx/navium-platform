@@ -7,6 +7,7 @@ import { UserAccRouter } from './routes/userAcc.route.js';
 import WebSocket, { WebSocketServer } from 'ws';
 import { InitSocket } from './socket/index.js';
 import { GraphQLRoutes } from './routes/graphql.js';
+import { ConversationsRouter } from './routes/conversation.route.js';
 
 const PORT = process.env.PORT || 3001;
 
@@ -18,6 +19,8 @@ const userAccRouter = new UserAccRouter();
 routeHandler.addRouteFrom(userAccRouter._get_user_acc_routes());
 const GraphQLRouter = new GraphQLRoutes();
 routeHandler.addRouteFrom(GraphQLRouter._get_graphql_routes());
+const conversationRouter = new ConversationsRouter()
+routeHandler.addRouteFrom(conversationRouter._get_conversation_routes());
 
 
 const server = http.createServer((req, res) => {

@@ -1,6 +1,4 @@
 import { buildSchema } from "graphql";
-import {gql} from "graphql-tag";
-
 
 // those things are written schema that to be returned to the user 
 // if any of the fields is not mentioned that could be not meant to be beign shared with the user.
