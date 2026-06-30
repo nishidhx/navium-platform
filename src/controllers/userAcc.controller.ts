@@ -51,9 +51,47 @@ export class UserAccController {
     /**
      * @method getUserTalk
      */
-    public static async getUserTalk(request: ServerRequest, response: ServerResponse) {
+    public static async getUserTalks(request: ServerRequest, response: ServerResponse) {
         const { data, error } = await safeWrapper(async () => {
-            
+            const userId = request?.user?.id
+
+            if (!userId) {
+                logger.D("Userid: " + userId)
+                throw new Error("UserId not found");
+            }
+
+            const conversations = await prisma.conversation.findMany({
+                where: {
+                        participants: { some: { userId: userId } },
+                },
+                orderBy: { updatedAt: "desc" },
+                include: {
+                    participants: { select: { user: { select: {
+                                    id: true,
+                                    username: true,
+                                }
+                            }
+                        }
+                    },
+                    messages: { orderBy: { createdAt: "desc" },
+                        take: 1
+                    }
+                },
+            });
+
+            return conversations;
         })();
+
+        if (error) {
+            logger.E("Error fetching user talks: " + error?.message);
+            return responseBody(request, response, 500, { message: "Internal Server Error" }, "error fetching user talks", LoggerLevel.ERROR);
+        }
+
+        if (data) {
+            const conversations = JSON.parse(JSON.stringify(data))
+            return responseBody(request, response, 200, { conversations: conversations }, "Conversations fetched successfully", LoggerLevel.INFO);
+        }
+
+        return responseBody(request, response, 200, { message: "user unauthorized", user: {/* user data */} }, "user unauthorized", LoggerLevel.INFO);
     }
 }

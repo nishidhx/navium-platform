@@ -25,7 +25,7 @@ export class UserAccRouter {
         this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/user/account", handler: UserAccController.getUserProfile, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthenticAndFetchData], description: "to get the user account"});    
 
         // get user chats
-        this.routeHandler.addRoute({ method: HTTPMETHOD.GET , path: "/api/v1/user/direct/t", handler: UserAccController.getUserTalk, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic], description: "Fetch all the posts of the user that are in direct messages"});
+        this.routeHandler.addRoute({ method: HTTPMETHOD.GET , path: "/api/v1/user/direct/t", handler: UserAccController.getUserTalks, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic], description: "Fetch all the posts of the user that are in direct messages"});
     }
 
     /**
