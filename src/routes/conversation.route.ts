@@ -22,7 +22,7 @@ export class ConversationsRouter {
      * ConversationRoutes Initializer
      */
     private initializeRoutes() {
-        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/conversation/user/direct/t/:conversationId", handler: ConversationController.getConversationbyId, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic], description: "used to fetch the conversations between the conversation participants" })
+        this.routeHandler.addRoute({ method: HTTPMETHOD.GET, path: "/api/v1/conversation/user/:conversation_type/t/:conversationId", handler: ConversationController.getConversationbyId, middleware: [AuthMiddleware.extractToken, AuthMiddleware.extractDataFromToken, AuthMiddleware.checkUserAuthentic], description: "used to fetch the conversations between the conversation participants" })
     }
 
     /**

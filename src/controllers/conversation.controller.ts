@@ -5,6 +5,7 @@ import { safeWrapper } from "../utils/wrappers/safe.js";
 import { prisma } from "../lib/prisma/prisma.js";
 import { responseBody } from "../lib/response_tr/response.js";
 import { LoggerLevel } from "../lib/response_tr/response.js";
+import type { ConversationType } from "@prisma/client";
 
 export class ConversationController {
 
@@ -14,12 +15,14 @@ export class ConversationController {
     public static async getConversationbyId(request: ServerRequest, response: ServerResponse) {
         const { data, error } = await safeWrapper(async () => {
             const conversationId = request.params?.conversationId as string;
+            const conversation_type = (request.params?.conversation_type as string).toUpperCase() as ConversationType;
             if (!conversationId) throw new Error("conversation not found")
+    
 
             const convesrationMessages = await prisma.conversation.findFirst({
                 where: {
                     id: conversationId,
-                    type: "DIRECT",
+                    type: conversation_type,
                     participants: {
                         some: {
                             userId: request?.user?.id,
@@ -65,7 +68,7 @@ export class ConversationController {
                 },
             })
 
-            if (!convesrationMessages || convesrationMessages.participants.length !== 2) return null;
+            // if (!convesrationMessages || convesrationMessages.participants.length !== 2) return null;
 
             return convesrationMessages
         })()

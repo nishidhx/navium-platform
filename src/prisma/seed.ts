@@ -169,6 +169,48 @@ async function main() {
     }
   });
 
+  const group2=await prisma.conversation.create({
+    data:{type:ConversationType.GROUP,name:"Design Team"}
+  });
+
+  await prisma.conversationParticipant.createMany({
+    data:[
+      {conversationId:group2.id,userId:nishidh.id},
+      {conversationId:group2.id,userId:alice.id},
+      {conversationId:group2.id,userId:emma.id},
+    ]
+  });
+
+  await prisma.message.create({
+    data:{
+      conversationId:group2.id,
+      senderId:emma.id,
+      content:"New UI mockups are ready for review.",
+      type:MessageType.TEXT
+    }
+  });
+
+  const group3=await prisma.conversation.create({
+    data:{type:ConversationType.GROUP,name:"Weekend Hackers"}
+  });
+
+  await prisma.conversationParticipant.createMany({
+    data:[
+      {conversationId:group3.id,userId:john.id},
+      {conversationId:group3.id,userId:alice.id},
+      {conversationId:group3.id,userId:emma.id},
+    ]
+  });
+
+  await prisma.message.create({
+    data:{
+      conversationId:group3.id,
+      senderId:john.id,
+      content:"Let's ship the feature by Friday.",
+      type:MessageType.TEXT
+    }
+  });
+
   console.log("Seed completed.");
 }
 
