@@ -109,6 +109,8 @@ model MessageAttachment {
   url String
 
   type AttachmentType
+
+  createdAt DateTime @default(now())
 }
 
 model Message {
