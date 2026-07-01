@@ -4,8 +4,9 @@ import { userTypeDefs } from "./modules/user/user.schema.js";
 import {gql} from "graphql-tag";
 import { mergeTypeDefs } from "@graphql-tools/merge";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { ConversationTypeDef } from "./modules/conversation/conversation.schema.js";
 
-const typeDefs = [userTypeDefs, authTypeDefs].join("\n");
+const typeDefs = [userTypeDefs, authTypeDefs, ConversationTypeDef].join("\n");
 // const rootTypeDefs = gql`
 //     type Query
 //     type Mutation

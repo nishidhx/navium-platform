@@ -5,6 +5,7 @@ import { LoggerLevel, responseBody } from "../lib/response_tr/response.js";
 import { defaultFieldResolver, graphql } from "graphql";
 import { userResolvers } from "../graphql/resolvers/user.resolver.js";
 import { schema } from "../graphql/schema.js";
+import { conversationResolvers } from "../graphql/resolvers/conversation.resolver.js";
 
 
 export class GraphQLController {
@@ -28,6 +29,11 @@ export class GraphQLController {
                 variableValues: variables,
                 fieldResolver: (source: any, args: any, context: any, info: any) => {
                     if (info.parentType?.name === "Query") {
+                        const conversationResolver = (conversationResolvers.Query as Record<string, any> | undefined)?.[info.fieldName];
+                        if (typeof conversationResolver === "function") {
+                            return conversationResolver(source, args, context, info);
+                        }
+
                         const resolver = (userResolvers.Query as Record<string, any> | undefined)?.[info.fieldName];
                         if (typeof resolver === "function") {
                             return resolver(source, args, context, info);
@@ -43,6 +49,13 @@ export class GraphQLController {
 
                     if (info.parentType?.name === "User") {
                         const resolver = (userResolvers.User as Record<string, any> | undefined)?.[info.fieldName];
+                        if (typeof resolver === "function") {
+                            return resolver(source, args, context, info);
+                        }
+                    }
+
+                    if (info.parentType?.name === "Conversation") {
+                        const resolver = (conversationResolvers.Query as Record<string, any> | undefined)?.[info.fieldName];
                         if (typeof resolver === "function") {
                             return resolver(source, args, context, info);
                         }
